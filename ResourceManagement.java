@@ -13,8 +13,10 @@ public class ResourceManagement
   {
     /* TODO : Fill in your name */
     System.out.println("This solution was completed by:");
-    System.out.println("<student name>");
-    System.out.println("<student name #2 (if no partner write \"N/A\")>");
+    System.out.println("Santiago Yuriar");
+    System.out.println("Dawson Merriman");
+    System.out.println(x:"Matthew McCabe");
+    System.out.println(x:"Patrick Tilotta");
   }
 
   /* Constructor for a ResourceManagement object
