@@ -27,7 +27,23 @@ public class ResourceManagement
   public ResourceManagement( String fileNames[], Double budget )
   {
     /* Create a department for each file listed in fileNames */
-    
+      for (int a = 0; a < fileNames.length; a++) {
+          Department dept = new Department("department" + a);
+          departmentList.add(dept);
+
+          try (Scanner scanner = new Scanner(new File(fileNames[a]))) {
+              if (scanner.hasNextLine()) {
+                  dept.name = scanner.nextLine(); // Reads the first line
+              }
+          } catch (IOException e) {
+              e.printStackTrace();
+          }
+      }
+
+      // Print department names For Test
+      for (Department dept : departmentList) {
+          System.out.println(dept.name);
+      }
     
     /* Simulate the algorithm for picking the items to purchase */
     /* Be sure to print the items out as you purchase them */
