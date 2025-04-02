@@ -41,11 +41,13 @@ public class ResourceManagement
    * Print a summary of what each department received and did not receive.
    * Be sure to also print remaining items in each itemsDesired Queue.
    */      
-  public void printSummary(  ){
+ public void printSummary(Item item){
     
     /* Here's the part of the code I used for printing prices */
     //String price = String.format("$%.2f", /*Item's price*/ );
     //System.out.printf("%-30s - %30s\n", /*Item's name*/, price );
+    String price = String.format("%.2f", item(Price));
+    System.out.printf("%-30s - %30s\n", item.name, item.price );
   }   
 }
 
