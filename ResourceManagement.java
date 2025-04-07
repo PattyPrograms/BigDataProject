@@ -13,7 +13,7 @@ public class ResourceManagement
   {
     /* TODO : Fill in your name */
     System.out.println("This solution was completed by:");
-    System.out.println("Lead Developer: Joshua Guzman");
+    System.out.println("Joshua Guzman");
     System.out.println("Santiago Yuriar");
     System.out.println("Dawson Merriman");
     System.out.println("Matthew McCabe");
