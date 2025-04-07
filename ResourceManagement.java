@@ -1,79 +1,133 @@
 import java.io.File;
 import java.util.*;
-public class ResourceManagement
-{
-  private PriorityQueue<Department> departmentPQ; /* priority queue of departments */
-  private Double remainingBudget;                 /* the budget left after purchases are made (should be 0 after the constructor runs) */
-  private Double budget;                          /* the total budget allocated */
-  
-  /* TO BE COMPLETED BY YOU
-   * Fill in your name in the function below
-   */  
-  public static void printName( )
-  {
-    /* TODO : Fill in your name */
-    System.out.println("This solution was completed by:");
-    System.out.println("Joshua Guzman");
-    System.out.println("Santiago Yuriar");
-    System.out.println("Dawson Merriman");
-    System.out.println("Matthew McCabe");
-    System.out.println("Patrick Tilotta");
-  }
 
-  /* Constructor for a ResourceManagement object
-   * TODO
-   * Simulates the algorithm from the pdf to determine what items are purchased
-   * for the given budget and department item lists.
-   */
-  public ResourceManagement( String fileNames[], Double budget )
-  {
-    /* Create a department for each file listed in fileNames */
-      for (int a = 0; a < fileNames.length; a++) {
-          Department dept = new Department("department" + a);
-          departmentList.add(dept);
+public class ResourceManagement {
+    private PriorityQueue<Department> departmentPQ;
+    private List<Department> allDepartments;
+    private Double remainingBudget;
+    private Double budget;
+    private List<String> purchasedItemsOutput;
 
-          try (Scanner scanner = new Scanner(new File(fileNames[a]))) {
-              if (scanner.hasNextLine()) {
-                  dept.name = scanner.nextLine(); // Reads the first line
-              }
-          } catch (IOException e) {
-              e.printStackTrace();
-          }
-      }
+    public static void printName() {
+        System.out.println("This solution was completed by:");
+        System.out.println("Joshua Guzman");
+        System.out.println("Santiago Yuriar");
+        System.out.println("Dawson Merriman");
+        System.out.println("Matthew McCabe");
+        System.out.println("Patrick Tilotta");
+    }
 
-      // Print department names For Test
-      for (Department dept : departmentList) {
-          System.out.println(dept.name);
-      }
-    
-    /* Simulate the algorithm for picking the items to purchase */
-    /* Be sure to print the items out as you purchase them */
-    /* Here's the part of the code I used for printing prices as items */
-    //String price = String.format("$%.2f", /*Item's price*/ );
-    //System.out.printf("Department of %-30s- %-30s- %30s\n", /*Department's name*/, /*Item's name*/, price );
-    
-    
-  } 
+    public ResourceManagement(String[] fileNames, Double budget) {
+        departmentPQ = new PriorityQueue<>();
+        allDepartments = new ArrayList<>();
+        purchasedItemsOutput = new ArrayList<>();
+        this.budget = budget;
+        this.remainingBudget = budget;
 
-  /* printSummary
-   * TODO
-   * Print a summary of what each department received and did not receive.
-   * Be sure to also print remaining items in each itemsDesired Queue.
-   */      
- public void printSummary(Item item){
-    
-    /* Here's the part of the code I used for printing prices */
-    //String price = String.format("$%.2f", /*Item's price*/ );
-    //System.out.printf("%-30s - %30s\n", /*Item's name*/, price );
-    String price = String.format("%.2f", item(Price));
-    System.out.printf("%-30s - %30s\n", item.name, item.price );
-  }   
+        // Create departments from file names
+        for (String fileName : fileNames) {
+            Department dept = new Department(fileName);
+            departmentPQ.add(dept);
+            allDepartments.add(dept);
+        }
+
+        // Algorithm for distributing budget
+        while (remainingBudget > 0 && !departmentPQ.isEmpty()) {
+            Department dept = departmentPQ.poll();
+
+            // Remove items that are too expensive
+            while (!dept.itemsDesired.isEmpty() && dept.itemsDesired.peek().price > remainingBudget) {
+                Item removedItem = dept.itemsDesired.poll();
+                dept.itemsRemoved.add(removedItem);
+            }
+
+            // Process department
+            if (dept.itemsDesired.isEmpty()) {
+                // If no items are left, give a scholarship (but only if we still have departments in the PQ)
+                if (departmentPQ.isEmpty() || remainingBudget <= 0) {
+                    continue; // Skip if we're the last department or out of budget
+                }
+                
+                double scholarship = Math.min(1000.0, remainingBudget);
+                if (scholarship > 0) {
+                    dept.priority += scholarship;
+                    remainingBudget -= scholarship;
+                    purchasedItemsOutput.add(String.format("Department of %-30s- %-30s- %30s", 
+                                                           dept.name, "Scholarship", 
+                                                           String.format("$%.2f", scholarship)));
+                    // Add back to queue only if scholarship was given
+                    departmentPQ.add(dept);
+                }
+            } else {
+                // Buy the next affordable item
+                Item item = dept.itemsDesired.poll();
+                dept.itemsReceived.add(item);
+                dept.priority += item.price;
+                remainingBudget -= item.price;
+                purchasedItemsOutput.add(String.format("Department of %-30s- %-30s- %30s",
+                                                      dept.name, item.name,
+                                                      String.format("$%.2f", item.price)));
+                
+                // Add the department back to the queue if it has more items or we could give it a scholarship
+                if (!dept.itemsDesired.isEmpty() || remainingBudget >= 1000.0) {
+                    departmentPQ.add(dept);
+                }
+            }
+        }
+        
+        // Move any remaining desired items to the removed list
+        while (!departmentPQ.isEmpty()) {
+            Department dept = departmentPQ.poll();
+            while (!dept.itemsDesired.isEmpty()) {
+                dept.itemsRemoved.add(dept.itemsDesired.poll());
+            }
+        }
+    }
+
+    public void printSummary() {
+        // First print purchased items
+        System.out.println("ITEMS PURCHASED\n----------------------------");
+        for (String line : purchasedItemsOutput) {
+            System.out.println(line);
+        }
+
+        System.out.println();
+        
+        // Then print departmental summaries
+        for (Department dept : allDepartments) {
+            System.out.println(dept.name);
+            System.out.printf("Total Spent             = $%.2f\n", dept.priority);
+            System.out.printf("Percent of Budget = %.2f%%\n", (dept.priority / budget) * 100);
+            System.out.println("----------------------------");
+            
+            System.out.println("ITEMS RECEIVED");
+            if (dept.itemsReceived.isEmpty()) {
+                System.out.println("None");
+            } else {
+                for (Item item : dept.itemsReceived) {
+                    System.out.println(item.name);
+                }
+            }
+            
+            System.out.println("ITEMS NOT RECEIVED");
+            if (dept.itemsRemoved.isEmpty() && dept.itemsDesired.isEmpty()) {
+                System.out.println("None");
+            } else {
+                for (Item item : dept.itemsRemoved) {
+                    System.out.println(item.name);
+                }
+                for (Item item : dept.itemsDesired) {
+                    System.out.println(item.name);
+                }
+            }
+            System.out.println();
+        }
+        
+        // Print remaining budget
+        System.out.printf("Remaining Budget: $%.2f\n", remainingBudget);
+    }
 }
 
-/* Department
- *
- * Stores the information associated with a Department at the university
- */
 class Department implements Comparable<Department> {
     String name;
     Double priority;
@@ -81,98 +135,88 @@ class Department implements Comparable<Department> {
     Queue<Item> itemsReceived;
     Queue<Item> itemsRemoved;
 
-    // Constructor
     public Department(String fileName) {
         itemsDesired = new LinkedList<>();
         itemsReceived = new LinkedList<>();
         itemsRemoved = new LinkedList<>();
-        priority = 0.0; // Initially, the department's priority (money spent) is 0.
+        priority = 0.0;
 
         Scanner input = null;
         try {
             File file = new File(fileName);
             input = new Scanner(file);
 
+            // Read department name
             if (input.hasNextLine()) {
-                name = input.nextLine().trim();  // Read full department name
+                name = input.nextLine().trim();
             }
 
-            while (input.hasNext()) {
-                String itemName = input.next();
-                if (input.hasNextDouble()) {
-                    double itemPrice = input.nextDouble();
-                    itemsDesired.add(new Item(itemName, itemPrice));
-                } else {
-                    itemName += " " + input.nextLine();
+            // Read items and prices
+            while (input.hasNextLine()) {
+                String line = input.nextLine().trim();
+                if (line.isEmpty()) continue;
+                
+                String itemName = line;
+                
+                // Look for price on next line
+                if (input.hasNextLine()) {
+                    String priceLine = input.nextLine().trim();
+                    if (!priceLine.isEmpty()) {
+                        try {
+                            double itemPrice = Double.parseDouble(priceLine);
+                            itemsDesired.add(new Item(itemName, itemPrice));
+                        } catch (NumberFormatException e) {
+                            // If price can't be parsed, continue to next line
+                            System.out.println("Error parsing price for item: " + itemName);
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
             System.out.println("Error reading file: " + fileName);
             e.printStackTrace();
         } finally {
-            if (input != null) {
-                input.close();  // Ensure the file is closed properly
-            }
+            if (input != null) input.close();
         }
     }
 
     @Override
-    public int compareTo(Department dept) {
-        int priorityComparison = this.priority.compareTo(dept.priority);
-        return (priorityComparison != 0) ? priorityComparison : this.name.compareTo(dept.name);
+    public int compareTo(Department other) {
+        int priorityComparison = this.priority.compareTo(other.priority);
+        return (priorityComparison != 0) ? priorityComparison : this.name.compareTo(other.name);
     }
 
-  public boolean equals( Department dept ){
-    return this.name.compareTo( dept.name ) == 0;
-  }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Department)) return false;
+        Department that = (Department) obj;
+        return this.name.equals(that.name);
+    }
 
-  @Override 
-  @SuppressWarnings("unchecked") //Suppresses warning for cast
-  public boolean equals(Object aThat) {
-    if (this == aThat) //Shortcut the future comparisons if the locations in memory are the same
-      return true;
-    if (!(aThat instanceof Department))
-      return false;
-    Department that = (Department)aThat;
-    return this.equals( that ); //Use above equals method
-  }
-  
-  @Override
-  public int hashCode() {
-    return name.hashCode(); /* use the hashCode for data stored in this name */
-  }
-
-  /* Debugging tool
-   * Converts this Department to a string
-   */	
-  @Override
-  public String toString() {
-    return "NAME: " + name + "\nPRIORITY: " + priority + "\nDESIRED: " + itemsDesired + "\nRECEIVED " + itemsReceived + "\nREMOVED " + itemsRemoved + "\n";
-  }
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+    
+    @Override
+    public String toString() {
+        return "NAME: " + name + "\nPRIORITY: " + priority + "\nDESIRED: " + itemsDesired + 
+               "\nRECEIVED " + itemsReceived + "\nREMOVED " + itemsRemoved + "\n";
+    }
 }
 
-/* Item
- *
- * Stores the information associated with an Item which is desired by a Department
- */
-class Item
-{
-  String name;    /* name of this item */
-  Double price;   /* price of this item */
+class Item {
+    String name;
+    Double price;
 
-  /*
-   * Constructor to build a Item
-   */
-  public Item( String name, Double price ){
-    this.name = name;
-    this.price = price;
-  }
+    public Item(String name, Double price) {
+        this.name = name;
+        this.price = price;
+    }
 
-  /* Debugging tool
-   * Converts this Item to a string
-   */		
-  @Override
-  public String toString() {
-    return "{ " + name + ", " + price + " }";
-  }
+    @Override
+    public String toString() {
+        return "{ " + name + ", $" + String.format("%.2f", price) + " }";
+    }
 }
