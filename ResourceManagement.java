@@ -51,6 +51,8 @@ public class ResourceManagement {
                 double scholarship = Math.min(1000.0, remainingBudget);
                 if (scholarship > 0) {
                     dept.priority += scholarship;
+                    Item scholarshipItem = new Item("Scholarship", scholarship);
+                    dept.itemsReceived.add(scholarshipItem);
                     remainingBudget -= scholarship;
                     purchasedItemsOutput.add(String.format("Department of %-30s- %-30s- %30s", 
                                                            dept.name, "Scholarship", 
