@@ -57,7 +57,6 @@ public class ResourceManagement {
                     purchasedItemsOutput.add(String.format("Department of %-30s- %-30s- %30s",
                                                            dept.name, "Scholarship",
                                                            String.format("$%.2f", scholarship)));
-                    // Add back to queue only if scholarship was given
                     departmentPQ.add(dept);
                 }
             } else {
@@ -70,14 +69,14 @@ public class ResourceManagement {
                                                       dept.name, item.name,
                                                       String.format("$%.2f", item.price)));
 
-                // Add the department back to the queue if it has more items or we could give it a scholarship
+                // Add department back if it has more items or could receive a scholarship
                 if (!dept.itemsDesired.isEmpty() || remainingBudget >= 1000.0) {
                     departmentPQ.add(dept);
                 }
             }
         }
 
-        // Move any remaining desired items to the removed list
+        // Move remaining desired items to removed list
         while (!departmentPQ.isEmpty()) {
             Department dept = departmentPQ.poll();
             while (!dept.itemsDesired.isEmpty()) {
@@ -87,7 +86,7 @@ public class ResourceManagement {
     }
 
     public void printSummary() {
-        // First print purchased items
+        // Print purchased items
         System.out.println("ITEMS PURCHASED\n----------------------------");
         for (String line : purchasedItemsOutput) {
             System.out.println(line);
@@ -95,7 +94,7 @@ public class ResourceManagement {
 
         System.out.println();
 
-        // Then print departmental summaries
+        // Print departmental summaries
         for (Department dept : allDepartments) {
             System.out.println(dept.name);
             System.out.printf("Total Spent             = $%.2f\n", dept.priority);
@@ -107,8 +106,8 @@ public class ResourceManagement {
                 System.out.println("None");
             } else {
                 for (Item item : dept.itemsReceived) {
-                    System.out.println(String.format("Department of %-30s- %-30s- %30s",
-                            dept.name, item.name, String.format("$%.2f", item.price)));
+                    System.out.println(String.format("%-30s- %30s",
+                            item.name, String.format("$%.2f", item.price)));
                 }
             }
 
@@ -117,12 +116,12 @@ public class ResourceManagement {
                 System.out.println("None");
             } else {
                 for (Item item : dept.itemsRemoved) {
-                    System.out.println(String.format("Department of %-30s- %-30s- %30s",
-                            dept.name, item.name, String.format("$%.2f", item.price)));
+                    System.out.println(String.format("%-30s- %30s",
+                            item.name, String.format("$%.2f", item.price)));
                 }
                 for (Item item : dept.itemsDesired) {
-                    System.out.println(String.format("Department of %-30s- %-30s- %30s",
-                            dept.name, item.name, String.format("$%.2f", item.price)));
+                    System.out.println(String.format("%-30s- %30s",
+                            item.name, String.format("$%.2f", item.price)));
                 }
             }
 
@@ -164,7 +163,7 @@ class Department implements Comparable<Department> {
 
                 String itemName = line;
 
-                // Look for price on next line
+                // Read next line as price
                 if (input.hasNextLine()) {
                     String priceLine = input.nextLine().trim();
                     if (!priceLine.isEmpty()) {
