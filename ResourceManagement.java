@@ -47,15 +47,15 @@ public class ResourceManagement {
                 if (departmentPQ.isEmpty() || remainingBudget <= 0) {
                     continue; // Skip if we're the last department or out of budget
                 }
-                
+
                 double scholarship = Math.min(1000.0, remainingBudget);
                 if (scholarship > 0) {
                     dept.priority += scholarship;
                     Item scholarshipItem = new Item("Scholarship", scholarship);
                     dept.itemsReceived.add(scholarshipItem);
                     remainingBudget -= scholarship;
-                    purchasedItemsOutput.add(String.format("Department of %-30s- %-30s- %30s", 
-                                                           dept.name, "Scholarship", 
+                    purchasedItemsOutput.add(String.format("Department of %-30s- %-30s- %30s",
+                                                           dept.name, "Scholarship",
                                                            String.format("$%.2f", scholarship)));
                     // Add back to queue only if scholarship was given
                     departmentPQ.add(dept);
@@ -69,14 +69,14 @@ public class ResourceManagement {
                 purchasedItemsOutput.add(String.format("Department of %-30s- %-30s- %30s",
                                                       dept.name, item.name,
                                                       String.format("$%.2f", item.price)));
-                
+
                 // Add the department back to the queue if it has more items or we could give it a scholarship
                 if (!dept.itemsDesired.isEmpty() || remainingBudget >= 1000.0) {
                     departmentPQ.add(dept);
                 }
             }
         }
-        
+
         // Move any remaining desired items to the removed list
         while (!departmentPQ.isEmpty()) {
             Department dept = departmentPQ.poll();
@@ -94,37 +94,41 @@ public class ResourceManagement {
         }
 
         System.out.println();
-        
+
         // Then print departmental summaries
         for (Department dept : allDepartments) {
             System.out.println(dept.name);
             System.out.printf("Total Spent             = $%.2f\n", dept.priority);
             System.out.printf("Percent of Budget = %.2f%%\n", (dept.priority / budget) * 100);
             System.out.println("----------------------------");
-            
+
             System.out.println("ITEMS RECEIVED");
             if (dept.itemsReceived.isEmpty()) {
                 System.out.println("None");
             } else {
                 for (Item item : dept.itemsReceived) {
-                    System.out.println(item.name);
+                    System.out.println(String.format("Department of %-30s- %-30s- %30s",
+                            dept.name, item.name, String.format("$%.2f", item.price)));
                 }
             }
-            
+
             System.out.println("ITEMS NOT RECEIVED");
             if (dept.itemsRemoved.isEmpty() && dept.itemsDesired.isEmpty()) {
                 System.out.println("None");
             } else {
                 for (Item item : dept.itemsRemoved) {
-                    System.out.println(item.name);
+                    System.out.println(String.format("Department of %-30s- %-30s- %30s",
+                            dept.name, item.name, String.format("$%.2f", item.price)));
                 }
                 for (Item item : dept.itemsDesired) {
-                    System.out.println(item.name);
+                    System.out.println(String.format("Department of %-30s- %-30s- %30s",
+                            dept.name, item.name, String.format("$%.2f", item.price)));
                 }
             }
+
             System.out.println();
         }
-        
+
         // Print remaining budget
         System.out.printf("Remaining Budget: $%.2f\n", remainingBudget);
     }
@@ -157,9 +161,9 @@ class Department implements Comparable<Department> {
             while (input.hasNextLine()) {
                 String line = input.nextLine().trim();
                 if (line.isEmpty()) continue;
-                
+
                 String itemName = line;
-                
+
                 // Look for price on next line
                 if (input.hasNextLine()) {
                     String priceLine = input.nextLine().trim();
@@ -168,7 +172,6 @@ class Department implements Comparable<Department> {
                             double itemPrice = Double.parseDouble(priceLine);
                             itemsDesired.add(new Item(itemName, itemPrice));
                         } catch (NumberFormatException e) {
-                            // If price can't be parsed, continue to next line
                             System.out.println("Error parsing price for item: " + itemName);
                         }
                     }
@@ -200,10 +203,10 @@ class Department implements Comparable<Department> {
     public int hashCode() {
         return name.hashCode();
     }
-    
+
     @Override
     public String toString() {
-        return "NAME: " + name + "\nPRIORITY: " + priority + "\nDESIRED: " + itemsDesired + 
+        return "NAME: " + name + "\nPRIORITY: " + priority + "\nDESIRED: " + itemsDesired +
                "\nRECEIVED " + itemsReceived + "\nREMOVED " + itemsRemoved + "\n";
     }
 }
