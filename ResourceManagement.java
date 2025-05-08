@@ -1,7 +1,7 @@
 import java.io.File;
 import java.util.*;
 
-public class ResourceManagement {
+public class resourceManagement {
     private PriorityQueue<Department> departmentPQ;
     private List<Department> allDepartments;
     private Double remainingBudget;
@@ -17,7 +17,7 @@ public class ResourceManagement {
         System.out.println("Patrick Tilotta");
     }
 
-    public ResourceManagement(String[] fileNames, Double budget) {
+    public resourceManagement(String[] fileNames, Double budget) {
         departmentPQ = new PriorityQueue<>();
         allDepartments = new ArrayList<>();
         purchasedItemsOutput = new ArrayList<>();
